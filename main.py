@@ -37,7 +37,6 @@ def note_handler(addr, note,velocity,chan):
                 harmnote, fracinstr = vhWrap.vectorHarmonizeMidiNoteOff(note, chan)
             if harmnote > -999:
                 returnmsg = [harmnote, velocity, chan, fracinstr]
-                print(returnmsg)
                 msg = oscbuildparse.OSCMessage("/vectorHarmonizerReturnNote", None, returnmsg)
                 osc_send(msg, "vectorHarmClient")
         if vhWrap.vectorHarmonizeAutoVoiceRange:

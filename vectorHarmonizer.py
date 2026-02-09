@@ -111,23 +111,18 @@ class VectorHarmonizer:
         #timeThen = time.time() # for profiling
         if not intervalVector:
             intervalVector = self.intervalVector
-        print(f'[HARMONIZE] Starting with previousChord size: {len(self.previousChord)}, intervalVector: {intervalVector}')
         chordAlternatives = {}
         # find all chord alternatives, store in dictionary
         # using the transposed pcset as key, and a score as value
         for pcset in self.iVP.getPcsets(intervalVector):
             # get rid of the zero in the pcset,
             # as this equals the melody note and should not be treated as harmony
-            print('pcset:', pcset)
             pcset = pcset[1:]
             # transpose the rest of the pcset so that the melody note is the "fundamental" of the set
             pcset = [n + (note % 12) for n in pcset]
-            print('transposed pcset:', pcset)
             # expand this pitch set by finding all valid inversions and transpositions
             notes = self.findAllValidInversions(pcset)
-            print('notes:', notes)
             chords = findAllCombinationsListOfLists(notes)
-            print('chords:', chords)
             for chord in chords:
                 # get a score by counting semitone distance as sum for all voices.
                 semitoneScore = self.semitoneCount(chord)
@@ -150,12 +145,10 @@ class VectorHarmonizer:
         keylist = list(chordAlternatives)
         minScoreIndex = scorelist.index(min(scorelist))
         chord = list(keylist[minScoreIndex])
-        print('chosen chord score:', scorelist[minScoreIndex])
         # Update previous and second previous chords, and previous melodynote
         self.previousMelodynote = note                  # previous melody note, used for checking parallel motion
         self.secondPreviousChord = self.previousChord   # store second previous, for history control (not toggle back and forth between two chords)
         self.previousChord = chord                      # update previous with currently chosen chord
-        print(f'[HARMONIZE] Returning chord with {len(chord)} notes: {chord}')
         return chord
 
     def setCurrentChordForNote(self, note, chord, instr):
@@ -207,8 +200,6 @@ class VectorHarmonizer:
         @return: notes, List of lists (of notes) with all valid chord inversions of the pc set.
         """
         # For each unique pitch class, find all valid octaviations
-        print('pcset:', pcset)
-        print('previousChord:', self.previousChord)
         notes = []
         # find all octaviations of pitches, within octave range from previous pitches
         for pc in pcset:
@@ -217,12 +208,10 @@ class VectorHarmonizer:
             while pc < (min(self.previousChord) - 12):
                 pc = pc + 12
             tempNotes.append(pc)
-            print('tempNotes after transposing up:', tempNotes)
             # continue transposing, stop when exceeding one octave range above previous highest chord note
             while pc <= max(self.previousChord):
                 pc = pc + 12
                 tempNotes.append(pc)
-                print('tempNotes during transposing up:', tempNotes)
             notes.append(tempNotes)
         return notes
 
@@ -452,7 +441,6 @@ class VectorHarmonizer:
             middle_note = (self.voiceRange[0] + self.voiceRange[1]) // 2
             self.previousChord = [middle_note + i for i in range(harmony_size)]
             self.secondPreviousChord = list(self.previousChord)
-            print(f'Initialized previousChord for {harmony_size}-note harmony: {self.previousChord}')
         
         return self.intervalVector
 
