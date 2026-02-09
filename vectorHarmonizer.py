@@ -111,6 +111,7 @@ class VectorHarmonizer:
         #timeThen = time.time() # for profiling
         if not intervalVector:
             intervalVector = self.intervalVector
+        print(f'[HARMONIZE] Starting with previousChord size: {len(self.previousChord)}, intervalVector: {intervalVector}')
         chordAlternatives = {}
         # find all chord alternatives, store in dictionary
         # using the transposed pcset as key, and a score as value
@@ -154,6 +155,7 @@ class VectorHarmonizer:
         self.previousMelodynote = note                  # previous melody note, used for checking parallel motion
         self.secondPreviousChord = self.previousChord   # store second previous, for history control (not toggle back and forth between two chords)
         self.previousChord = chord                      # update previous with currently chosen chord
+        print(f'[HARMONIZE] Returning chord with {len(chord)} notes: {chord}')
         return chord
 
     def setCurrentChordForNote(self, note, chord, instr):
@@ -204,27 +206,24 @@ class VectorHarmonizer:
         @param pcset: The pc set to find valid inversions for.
         @return: notes, List of lists (of notes) with all valid chord inversions of the pc set.
         """
-        # make all possible rotations and transformations,
-        pcsets = allPermutations(pcset)
-        print('pcsets permutations:', pcsets)
+        # For each unique pitch class, find all valid octaviations
+        print('pcset:', pcset)
         print('previousChord:', self.previousChord)
-        notes =[]
-        # find all octaviations of pitches, within octave range from previous pitch in voice
-        for pcset in pcsets:
-            for i in range(0,len(pcset)):
-                pc = pcset[i]
-                tempNotes= []
-                # transpose up by octaves until within one octave range below previous lowest chord note
-                while pc < (min(self.previousChord) - 12):
-                    pc = pc + 12
+        notes = []
+        # find all octaviations of pitches, within octave range from previous pitches
+        for pc in pcset:
+            tempNotes = []
+            # transpose up by octaves until within one octave range below previous lowest chord note
+            while pc < (min(self.previousChord) - 12):
+                pc = pc + 12
+            tempNotes.append(pc)
+            print('tempNotes after transposing up:', tempNotes)
+            # continue transposing, stop when exceeding one octave range above previous highest chord note
+            while pc <= max(self.previousChord):
+                pc = pc + 12
                 tempNotes.append(pc)
-                print('tempNotes after transposing up:', tempNotes)
-                # continue transposing, stop when exceeding one octave range above previous highest chord note
-                while pc <= max(self.previousChord):
-                    pc = pc + 12
-                    tempNotes.append(pc)
-                    print('tempNotes during transposing up:', tempNotes)
-                notes.append(tempNotes)
+                print('tempNotes during transposing up:', tempNotes)
+            notes.append(tempNotes)
         return notes
 
     def semitoneCount(self, chord):
@@ -432,6 +431,7 @@ class VectorHarmonizer:
         Set the interval vector used as default for harmonizing.
 
         The harmonize() method may be called with a vector argument, in which case the default vector will not be used.
+        Also initializes previousChord and secondPreviousChord to match the expected chord size.
 
         @param self: The object pointer.
         @param vector: The interval vector as a list of 6 values.
@@ -441,6 +441,19 @@ class VectorHarmonizer:
         if vector not in self.iVP.getVectors():
             return self.intervalVector
         self.intervalVector = vector
+        
+        # Initialize previousChord to match the expected chord size
+        # Get a sample pcset to determine the harmony size (pcset size - 1, since we remove the 0)
+        pcsets = self.iVP.getPcsets(vector)
+        if pcsets:
+            harmony_size = len(pcsets[0]) - 1  # Size after removing the [0]
+            # Initialize previousChord with neutral values based on the expected size
+            # Use the middle of the voice range
+            middle_note = (self.voiceRange[0] + self.voiceRange[1]) // 2
+            self.previousChord = [middle_note + i for i in range(harmony_size)]
+            self.secondPreviousChord = list(self.previousChord)
+            print(f'Initialized previousChord for {harmony_size}-note harmony: {self.previousChord}')
+        
         return self.intervalVector
 
 def test():

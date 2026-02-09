@@ -13,6 +13,17 @@ Quick and dirty adaption from ImproSculpt4 eventCaller
 
 from pythresh import *
 from vectorHarmonizer import *
+import os
+
+# Set up logging to file
+log_file = os.path.join(os.path.dirname(__file__), 'vectorHarmonizer_debug.log')
+log_handle = open(log_file, 'w')
+
+def debug_log(msg):
+    """Print to console and log to file"""
+    print(msg)
+    log_handle.write(msg + '\n')
+    log_handle.flush()
 
 class VectorHarmWrap:
     """Wrapper for using vectorHarmonizer from Csound.
@@ -56,6 +67,7 @@ class VectorHarmWrap:
         if self.pendingOnEvents[key] == []:
             self._generate_harmonized_chord(note, channel, instr)
         pitch, instr = self.pendingOnEvents[key].pop(0)
+        print(f'[MIDI_NOTE] Returning note {pitch} (pending: {len(self.pendingOnEvents[key])} more)')
         return float(pitch), float(instr)
 
     def vectorHarmonizeMidiNoteOff(self, note, channel):
@@ -90,13 +102,14 @@ class VectorHarmWrap:
         if self.vectorHarmonizeAutoVoiceRange:
             self.vHarmonize.setVoiceRange([note-self.vHarmonize.autoVoiceRangeBorder, note+self.vHarmonize.autoVoiceRangeBorder])
         chord = self.vHarmonize.harmonize(note)
-        print('note:', note, 'chord:', chord)
+        print(f'[WRAPPER] Generated chord with {len(chord)} notes: {chord}')
         chord.append(-999) #end of list flag
         key = (note, channel)
         chordInstr = self.vHarmonize.setCurrentChordForNote(key, chord, instr)
         self.pendingOnEvents[key] = []
         for pitch, instr in chordInstr:
             self.pendingOnEvents[key].append([pitch, instr])
+        print(f'[WRAPPER] Queued {len(chordInstr)} harmony notes for playback: {[p[0] for p in chordInstr]}')
 
     def _queue_chord_off(self, note, channel):
         """Queue a harmonized chord for note off event.
@@ -125,7 +138,10 @@ class VectorHarmWrap:
             The computed interval vector, or None if fewer than 2 notes collected.
         """
         notelist = self.pyThresh.thresh(note)
-        if len(notelist) < 2: return
+        print(f'[RECORD_VECTOR] Input note: {note}, collected notes: {notelist}')
+        if len(notelist) < 2: 
+            print(f'[RECORD_VECTOR] Only {len(notelist)} notes, returning None')
+            return
         vector = self.vHarmonize.makeIntervalVector(notelist)
         print('recorded vector:', vector)
         vector = self.vHarmonize.setIntervalVector(vector)

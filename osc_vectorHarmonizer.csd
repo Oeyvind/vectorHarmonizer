@@ -132,13 +132,13 @@ instr   1
 
 	;print inote, ivel, ichn
   OSCsend     1, "127.0.0.1",gioutport, "/vectorHarmonizerNote", "iii", inote, ivel, ichn
-	event_i "i", (iM_instr+ifracinstrt), 0, -1, inote, ivel, ichn
+	;event_i "i", (iM_instr+ifracinstrt), 0, -1, inote, ivel, ichn
 	;print itime
 	xtratim 1/kr
 	krelease	release
 	if krelease > 0 then
   	OSCsend     1, "127.0.0.1",gioutport, "/vectorHarmonizerNote", "iii", inote, 0, ichn
-		event "i", -(iM_instr+ifracinstrt), 0, .1, inote, ivel, ichn
+		;event "i", -(iM_instr+ifracinstrt), 0, .1, inote, ivel, ichn
 	endif
 endin	
 
