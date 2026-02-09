@@ -115,24 +115,21 @@ def appendToEach(item, alist):
 
 def findAllCombinationsListOfLists(alist):
     """
-    Returns a list of lists with all combinations possible by combining one member from each of two list.
+    Returns a list of lists with all combinations possible by combining one member from each sublist.
 
     Lists may have different lengths.
-    If there are more than two lists in alist, they are combined pairwise,
-    then there must be an even number of sublists (e.g. 4 or 6 sublists.
-    If there is only one list, the returned list will consist of each member of the input list each inside it's own list (e.g. in=[[1,2]], out=[[1],[2]]]
+    If there are more than two lists in alist, they are combined pairwise until all are combined.
+    If there is only one list, the returned list will consist of each member of the input list each inside its own list (e.g. in=[[1,2]], out=[[1],[2]]).
 
     Example:
     [[1,2], [3,4]] -> [[1,3], [1,4], [2,3], [2,4]]
-    [[1,2], [3,4,5] -> [[1,3], [1,4], [1,5], [2,3], [2,4], [2,5]]
-    >>>alist = [[1,2],[3,4],[5,6],[7,8]]
-    >>> findAllCombinationsListOfLists(alist)
-    [[1, 3], [1, 4], [2, 3], [2, 4], [5, 7], [5, 8], [6, 7], [6, 8]]
+    [[1,2], [3,4,5]] -> [[1,3], [1,4], [1,5], [2,3], [2,4], [2,5]]
+    [[1,2],[3,4],[5,6],[7,8]] -> [[1,3,5,7], [1,3,5,8], [1,3,6,7], [1,3,6,8], [1,4,5,7], [1,4,5,8], [1,4,6,7], [1,4,6,8], [2,3,5,7], [2,3,5,8], [2,3,6,7], [2,3,6,8], [2,4,5,7], [2,4,5,8], [2,4,6,7], [2,4,6,8]]
 
     @param alist: The input list.
     @return: The list of lists with all combinations of alist.
     """
-    if len(alist) <=1:
+    if len(alist) <= 1:
         out = []
         try:
             for item in alist[0]:
@@ -140,14 +137,23 @@ def findAllCombinationsListOfLists(alist):
         except:
             pass
         return out
-    combo = []
+    
+    # Make a copy to avoid modifying the original
+    alist = list(alist)
+    
     while len(alist) >= 2:
         sub1 = alist.pop(0)
         sub2 = alist.pop(0)
-        for item in sub1:
+        combo = []
+        for item1 in sub1:
             for item2 in sub2:
-                combo.append([item, item2])
-    return combo
+                # Ensure both items are lists for combination
+                list1 = item1 if isinstance(item1, list) else [item1]
+                list2 = item2 if isinstance(item2, list) else [item2]
+                combo.append(list1 + list2)
+        alist.insert(0, combo)
+    
+    return alist[0]
 
 def factorial(n, result=1):
     """
