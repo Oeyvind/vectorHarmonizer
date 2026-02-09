@@ -193,13 +193,13 @@ class VectorHarmonizer:
 
         Find all valid inversions and transpositions related to the previous chord,
         so that the maximum leap for any single voice is one octave.
-        Returns a list of chords.
+        Returns a list of chords, limited to the 3 closest octaviations per pitch class.
 
         @param self: The object pointer.
         @param pcset: The pc set to find valid inversions for.
         @return: notes, List of lists (of notes) with all valid chord inversions of the pc set.
         """
-        # For each unique pitch class, find all valid octaviations
+        # For each unique pitch class, find valid octaviations limited to closest 3
         notes = []
         # find all octaviations of pitches, within octave range from previous pitches
         for pc in pcset:
@@ -212,6 +212,17 @@ class VectorHarmonizer:
             while pc <= max(self.previousChord):
                 pc = pc + 12
                 tempNotes.append(pc)
+            
+            # Limit to 3 closest octaviations based on distance to previous chord
+            if len(tempNotes) > 3:
+                # Calculate distance from each octaviation to the closest note in previousChord
+                def closest_distance(note):
+                    return min(abs(note - prev_note) for prev_note in self.previousChord)
+                
+                # Sort by distance and keep closest 3
+                tempNotes.sort(key=closest_distance)
+                tempNotes = tempNotes[:3]
+            
             notes.append(tempNotes)
         return notes
 
