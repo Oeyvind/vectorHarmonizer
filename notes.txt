@@ -1,0 +1,67 @@
+* todo:
+
+
+
+
+
+*****
+- OSC master/server ser ok ut, men Cs plug bruker 5% CPU på tomgang!
+- Segfault i server etter en stund med mye aktivitet og da henger toner
+- Kanskje flytte polyfoni/voice håndtering til plug, slik at man kan gjøre all notes off?
+- Kanskje endre server til bare å være python, uten Csound?
+*****
+
+- lage en egen tråd i Python, csound setter bare en flagg for hva som skal gjøres, men venter ikke på svar
+- Python beregner nye events, og legger i queue
+- Csound sjekker queue hver k-rate, dispense new events
+- Kanskje dette også åpner for å sjekke om off-events ligger i en annen voice (hvis de har blitt slått på to ganger)
+- ... og unngå å slå de på to ganger, men legge en (sig) counter for hver kanskje? hvis counter går fra 1 til 0 skal de skrus av
+
+
+
+** ok**
+- noen ganger går den seg vill og produserer kun veldig dype akkorder
+	- sjekker scoresystem...
+		- spreadScore gir negativ score (negativ er bedre...) invertere??
+		- semitone funker
+		- common funker (gir neg score til alt med common)
+		- parallel funker (gir pos score til alt med parallel)
+		- voiceRange funker (gir 0 til alt innenfor, pos score til alt utenfor range)
+		- antar at history funker (gir 0 i de tilfeller jeg kan se)
+		** select foretrekker den som har ***minimum score*** 
+
+
+
+
+* print/update vector and pc set display
+* test functions for gui handling
+
+
+* GUI
+*- record enable (pr channel) check box
+*- playback enable (pr channel) check box
+*- record thresh time
+*- auto vRange border
+*- voice range (2 numbers)
+
+- vRange score
+- common note score
+- parallel motion score
+- vRange Gravity
+- distance score
+- chord spread score
+- chord toggle score
+- chord repeat score
+- vector display
+	- make list, put in combo box
+- pitch class display
+	- make list, put in combo box
+label bounds(238, 10, 112, 15), text("Interval vector"),  colour(160, 160, 160, 255), fontcolour(255, 255, 255, 255), 
+combobox bounds(238, 30, 100, 30), channel("intervalVector"), channeltype("number"), text("1 0 0 0 0 0", "0 1 0 0 0 0", "0 0 1 0 0 0"), populate("", ""),  colour(0, 0, 0, 255), fontcolour(160, 160, 160, 255), value(1), 
+label bounds(238, 70, 96, 15), text("Pitch class"),  colour(160, 160, 160, 255), fontcolour(255, 255, 255, 255), 
+combobox bounds(238, 90, 100, 30), channel("pitchClass"), channeltype("number"), text("0 1 3,", "0 2 3,"), populate("", ""),  colour(0, 0, 0, 255), fontcolour(160, 160, 160, 255), value(1), 
+
+
+	
+rec thresh time
+
